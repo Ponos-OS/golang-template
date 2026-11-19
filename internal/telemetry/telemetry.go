@@ -11,8 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"os"
-	"strconv"
 
 	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.opentelemetry.io/otel"
@@ -23,12 +21,11 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.43.0"
+
+	"github.com/incognick/base/internal/config"
 )
 
-const (
-	serviceName     = "base"
-	logShippingOTLP = "otlp"
-)
+const serviceName = "base"
 
 // Telemetry owns the OpenTelemetry providers. The zero value is the disabled state.
 type Telemetry struct {
@@ -37,14 +34,10 @@ type Telemetry struct {
 	logHandler slog.Handler
 }
 
-// New starts tracing and, when OTEL_LOG_SHIPPING=otlp, log shipping.
-// With OTEL_ENABLED unset or false it does nothing and returns a disabled Telemetry.
-func New(ctx context.Context) (*Telemetry, error) {
-	enabled, err := envBool("OTEL_ENABLED")
-	if err != nil {
-		return nil, err
-	}
-	if !enabled {
+// New starts tracing and, when cfg.LogShipping is otlp, log shipping.
+// With cfg.Enabled false it does nothing and returns a disabled Telemetry.
+func New(ctx context.Context, cfg config.Otel) (*Telemetry, error) {
+	if !cfg.Enabled {
 		return &Telemetry{}, nil
 	}
 
@@ -61,7 +54,7 @@ func New(ctx context.Context) (*Telemetry, error) {
 	if err = t.startTraces(ctx, res); err != nil {
 		return nil, err
 	}
-	if os.Getenv("OTEL_LOG_SHIPPING") == logShippingOTLP {
+	if cfg.LogShipping == config.LogShippingOTLP {
 		if err = t.startLogs(ctx, res); err != nil {
 			return nil, errors.Join(err, t.Shutdown(ctx))
 		}
@@ -132,18 +125,4 @@ func (t *Telemetry) Shutdown(ctx context.Context) error {
 	}
 
 	return errors.Join(errs...)
-}
-
-func envBool(key string) (bool, error) {
-	raw, ok := os.LookupEnv(key)
-	if !ok || raw == "" {
-		return false, nil
-	}
-
-	v, err := strconv.ParseBool(raw)
-	if err != nil {
-		return false, fmt.Errorf("%s: %w", key, err)
-	}
-
-	return v, nil
 }

@@ -6,13 +6,13 @@ import (
 
 	"go.uber.org/fx"
 
-	// Autoload .env file
 	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
 	fx.New(
 		fx.Provide(
+			ConfigProvider,
 			TelemetryProvider,
 			LoggerProvider,
 			DatabaseProvider,

@@ -2,27 +2,16 @@ package main
 
 import (
 	"context"
-	"errors"
-	"os"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"go.uber.org/fx"
+
+	"github.com/incognick/base/internal/config"
 )
 
-// ErrDatabaseURLNotSet is returned when DATABASE_URL is missing.
-var ErrDatabaseURLNotSet = errors.New(
-	"DATABASE_URL environment variable not set",
-)
-
-func DatabaseProvider(lc fx.Lifecycle) (*sqlx.DB, error) {
-	url, ok := os.LookupEnv("DATABASE_URL")
-	if !ok {
-		return nil, ErrDatabaseURLNotSet
-	}
-
-	var err error
-	db, err := sqlx.Connect("postgres", url)
+func DatabaseProvider(lc fx.Lifecycle, cfg *config.Config) (*sqlx.DB, error) {
+	db, err := sqlx.Connect("postgres", cfg.DatabaseURL)
 	if err != nil {
 		return nil, err
 	}
