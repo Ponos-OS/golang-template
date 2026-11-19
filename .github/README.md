@@ -1,6 +1,8 @@
 # Golang Template
 
-Base project setup for any Go program
+Base project setup for any Go program.
+
+I build this template on top of what i found here: https://youtu.be/gCOAhSSjNMU
 
 ## Running Locally
 
