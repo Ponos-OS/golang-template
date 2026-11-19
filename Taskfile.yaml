@@ -1,0 +1,13 @@
+version: "3"
+
+dotenv: [".env"]
+
+tasks:
+  init:
+    desc: Initializes the project
+    cmds:
+      - cmd: cp --update=none .env.example .env
+        ignore_error: true
+  start:dev:
+    desc: Start the app in dev mode
+    cmd: go run ./cmd/server
