@@ -6,8 +6,17 @@ tasks:
   init:
     desc: Initializes the project
     cmds:
+      - go mod download
+      - go mod download -modfile=tools/go.mod
+      - go tool -modfile=tools/go.mod lefthook install
       - cmd: cp --update=none .env.example .env
         ignore_error: true
   start:dev:
     desc: Start the app in dev mode
     cmd: go run ./cmd/server
+  lint:check:
+    desc: Check formatting and lint without changing files
+    cmd: go tool -modfile=tools/go.mod golangci-lint run
+  lint:
+    desc: Apply lint fixes and formatting
+    cmd: go tool -modfile=tools/go.mod golangci-lint run --fix

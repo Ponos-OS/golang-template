@@ -70,7 +70,10 @@ func New(ctx context.Context) (*Telemetry, error) {
 	return t, nil
 }
 
-func (t *Telemetry) startTraces(ctx context.Context, res *resource.Resource) error {
+func (t *Telemetry) startTraces(
+	ctx context.Context,
+	res *resource.Resource,
+) error {
 	// Endpoint comes from OTEL_EXPORTER_OTLP_ENDPOINT.
 	exporter, err := otlptracehttp.New(ctx)
 	if err != nil {
@@ -91,7 +94,10 @@ func (t *Telemetry) startTraces(ctx context.Context, res *resource.Resource) err
 	return nil
 }
 
-func (t *Telemetry) startLogs(ctx context.Context, res *resource.Resource) error {
+func (t *Telemetry) startLogs(
+	ctx context.Context,
+	res *resource.Resource,
+) error {
 	exporter, err := otlploghttp.New(ctx)
 	if err != nil {
 		return fmt.Errorf("create log exporter: %w", err)
@@ -102,7 +108,10 @@ func (t *Telemetry) startLogs(ctx context.Context, res *resource.Resource) error
 		sdklog.WithResource(res),
 		sdklog.WithProcessor(sdklog.NewBatchProcessor(exporter)),
 	)
-	t.logHandler = otelslog.NewHandler(serviceName, otelslog.WithLoggerProvider(t.logs))
+	t.logHandler = otelslog.NewHandler(
+		serviceName,
+		otelslog.WithLoggerProvider(t.logs),
+	)
 
 	return nil
 }

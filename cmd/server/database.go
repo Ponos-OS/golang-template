@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"os"
 
 	"github.com/jmoiron/sqlx"
@@ -10,10 +10,15 @@ import (
 	"go.uber.org/fx"
 )
 
+// ErrDatabaseURLNotSet is returned when DATABASE_URL is missing.
+var ErrDatabaseURLNotSet = errors.New(
+	"DATABASE_URL environment variable not set",
+)
+
 func DatabaseProvider(lc fx.Lifecycle) (*sqlx.DB, error) {
 	url, ok := os.LookupEnv("DATABASE_URL")
 	if !ok {
-		return nil, fmt.Errorf("DATABASE_URL environment variable not set")
+		return nil, ErrDatabaseURLNotSet
 	}
 
 	var err error
@@ -23,7 +28,7 @@ func DatabaseProvider(lc fx.Lifecycle) (*sqlx.DB, error) {
 	}
 
 	lc.Append(fx.Hook{
-		OnStop: func(ctx context.Context) error {
+		OnStop: func(_ context.Context) error {
 			return db.Close()
 		},
 	})

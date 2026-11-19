@@ -5,9 +5,10 @@ import (
 	"log/slog"
 	"os"
 
+	"go.uber.org/fx"
+
 	"github.com/incognick/base/internal/logging"
 	"github.com/incognick/base/internal/telemetry"
-	"go.uber.org/fx"
 )
 
 // TelemetryProvider starts OpenTelemetry and flushes it on shutdown.

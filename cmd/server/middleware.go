@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/incognick/base/internal/logging"
 )
 
 // requestLogger logs one line per request.
@@ -23,13 +25,20 @@ func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 				status = http.StatusOK
 			}
 
-			logger.InfoContext(r.Context(), "request completed",
-				slog.String("request_id", middleware.GetReqID(r.Context())),
-				slog.String("method", r.Method),
-				slog.String("path", r.URL.Path),
-				slog.Int("status", status),
-				slog.Int("bytes", ww.BytesWritten()),
-				slog.Duration("duration", time.Since(start)),
+			logger.InfoContext(
+				r.Context(),
+				"request completed",
+				slog.String(
+					logging.KeyRequestID,
+					middleware.GetReqID(
+						r.Context(),
+					), // What Chi has, different from trace ID
+				),
+				slog.String(logging.KeyMethod, r.Method),
+				slog.String(logging.KeyPath, r.URL.Path),
+				slog.Int(logging.KeyStatus, status),
+				slog.Int(logging.KeyBytes, ww.BytesWritten()),
+				slog.Duration(logging.KeyDuration, time.Since(start)),
 			)
 		})
 	}
